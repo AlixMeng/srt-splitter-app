@@ -1,0 +1,23 @@
+version: '3.8' # Docker Compose 文件版本
+
+services:
+  srt-splitter: # 服务名称
+    build: . # Dockerfile 所在的目录，这里是当前目录
+    container_name: srt-splitter-app-container # 为容器指定一个易于识别的名称
+    ports:
+      - "5173:5000" # <宿主机端口>:<容器内部端口>，将宿主机的 5173 端口映射到容器的 5000 端口
+    volumes:
+      # 挂载宿主机的 hanlp_data 文件夹到容器的 /app/hanlp_data
+      # 这样 HanLP 模型数据可以在容器外部进行管理，避免每次构建镜像都下载
+      - ./hanlp_data:/app/hanlp_data
+      # 挂载 uploads 和 processed 文件夹，以便持久化上传和处理后的文件
+      - ./uploads:/app/uploads
+      - ./processed:/app/processed
+    environment:
+      # 如果您的 Flask 应用需要 SECRET_KEY，可以设置环境变量
+      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY:-your_default_secret_key_if_not_set}
+    restart: always # 容器总是自动重启
+
+networks:
+  default:
+    driver: bridge
